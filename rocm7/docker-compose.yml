@@ -11,34 +11,29 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: "yanwk/comfyui-boot:rocm7"
+    image: "localhost/comfyui-boot:rocm7"
+    networks:
+      - internal
     ports:
       - "8188:8188"
     volumes:
-      # - "./storage:/root"
-      - "./storage-models/models:/root/ComfyUI/models"
-      - "./storage-models/hf-hub:/root/.cache/huggingface/hub"
-      - "./storage-models/torch-hub:/root/.cache/torch/hub"
-      - "./storage-user/input:/root/ComfyUI/input"
-      - "./storage-user/output:/root/ComfyUI/output"
-      - "./storage-user/workflows:/root/ComfyUI/user/default/workflows"
+       - "~/.comfyui:/root"
     environment:
-      - CLI_ARGS=
-      # - CLI_ARGS=--disable-smart-memory --use-pytorch-cross-attention
-      # - HSA_OVERRIDE_GFX_VERSION=12.0.0
-      # - HIP_VISIBLE_DEVICES=0
-      # - HSA_DISABLE_FRAGMENT_ALLOCATOR=1
-      # - PYTORCH_TUNABLEOP_ENABLED=1
+      HSA_OVERRIDE_GFX_VERSION: 12.0.1
+      HIP_VISIBLE_DEVICES: "1,0"
     devices:
       - /dev/kfd
       - /dev/dri
     group_add:
       - video
-      - render # redundant but does no harm
     ipc: host
     cap_add:
       - SYS_PTRACE
     security_opt:
       - seccomp:unconfined
       - label:disable
-    # shm_size: 8g # Uncomment if you don't want to use --ipc=host
+
+networks:
+  internal:
+    driver: bridge
+    internal: true  # No external access

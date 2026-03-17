@@ -1,0 +1,33 @@
+# https://github.com/pollockjj/ComfyUI-MultiGPU
+pillow>=10.3.0
+color-matcher
+mss
+opencv-python-headless
+
+# https://github.com/yolain/ComfyUI-Easy-Use
+accelerate
+clip_interrogator>=0.6.0
+lark
+onnxruntime
+opencv-python-headless
+sentencepiece
+spandrel
+peft
+
+# https://github.com/Fannovel16/ComfyUI-Frame-Interpolation
+torch
+numpy
+einops
+opencv-contrib-python
+kornia
+torchvision
+tqdm
+
+# https://github.com/kaaskoek232/IPAdapterWAN (requirements satisfied above)
+
+# https://github.com/chflame163/ComfyUI_LayerStyle
+scikit_image
+scikit_learn
+pymatting
+blend_modes
+loguru

@@ -13,6 +13,7 @@ filelock
 fvcore
 gguf
 GitPython
+hydra-core
 imageio-ffmpeg
 importlib-metadata
 matrix-nio

@@ -121,6 +121,10 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
         -r /builder-scripts/pak7.txt
 
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install \
+        -r /builder-scripts/pak8.txt
+
 # Prevent SAM-2 from installing CUDA packages
 # SAM-2 is used by ComfyUI-Impact-Pack
 RUN --mount=type=cache,target=/root/.cache/pip \
