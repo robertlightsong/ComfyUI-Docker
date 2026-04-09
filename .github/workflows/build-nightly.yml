@@ -2,7 +2,7 @@ name: Publish 'nightly' to Docker Hub
 
 on: 
   workflow_dispatch: # Can be manually triggered
-  schedule: # Runs on every Friday, at 00:00 UTC
+  schedule: # Run on every Friday, at 00:00 UTC
     - cron: '0 0 * * 5'
   push: 
     branches: [ main ]
@@ -10,6 +10,8 @@ on:
       - '**'
       - '!nightly/Dockerfile'
       - '!.github/workflows/build-nightly.yml'
+      # Trigger when new ComfyUI version released
+      - '!.github/current_comfyui_release.txt'
 
 jobs:
 
@@ -17,24 +19,6 @@ jobs:
     environment: Publish to Docker Hub
     runs-on: ubuntu-latest
     steps:
-      - name: Move Docker data-root to /mnt
-        run: |
-          sudo systemctl stop docker
-
-          sudo mkdir -p /mnt/docker
-          sudo mkdir -p /etc/docker
-
-          cat /etc/docker/daemon.json || true
-
-          sudo tee /etc/docker/daemon.json > /dev/null <<'EOF'
-          {
-            "data-root": "/mnt/docker"
-          }
-          EOF
-
-          sudo systemctl restart docker
-          docker info | grep "Docker Root Dir"
-
       -
         name: Get current commit hash
         id: commit
@@ -70,7 +54,9 @@ jobs:
           docker run --rm \
             --name show-env \
             docker.io/yanwk/comfyui-boot:nightly \
-            env
+            env \
+            && echo "====" \
+            && ldconfig -p
       - 
         name: Test 'nightly'
         run: |

@@ -1,6 +1,6 @@
 ################################################################################
 # Dockerfile that builds 'yanwk/comfyui-boot:cpu'
-# A runtime environment for https://github.com/comfyanonymous/ComfyUI
+# A runtime environment for https://github.com/Comfy-Org/ComfyUI
 # Using CPU only (not using GPU).
 # The container will be running in root (easy for rootless deploy).
 ################################################################################
@@ -8,8 +8,6 @@
 FROM docker.io/opensuse/tumbleweed:latest
 
 LABEL maintainer="YAN Wenkun <code@yanwk.fun>"
-
-RUN set -eu
 
 ################################################################################
 # Python and tools

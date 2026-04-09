@@ -1,6 +1,6 @@
 ################################################################################
 # Dockerfile that builds 'yanwk/comfyui-boot:cu128-slim'
-# A runtime environment for https://github.com/comfyanonymous/ComfyUI
+# A runtime environment for https://github.com/Comfy-Org/ComfyUI
 # Using CUDA 12.8, Python 3.12
 # The container will be running in root (easy for rootless deploy).
 ################################################################################
@@ -158,12 +158,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
         xformers torchvision torchaudio \
-        --index-url https://download.pytorch.org/whl/cu128
-
-# Install Triton (redundant)
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install \
-        triton pytorch-triton \
         --index-url https://download.pytorch.org/whl/cu128
 
 # Bind libs (.so files)

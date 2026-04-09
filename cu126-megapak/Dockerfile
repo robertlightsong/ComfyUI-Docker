@@ -1,15 +1,15 @@
 ################################################################################
 # Dockerfile that builds 'yanwk/comfyui-boot:cu126-megapak'
-# A runtime environment for https://github.com/comfyanonymous/ComfyUI
-# Using CUDA 12.6, Python 3.12
-# The container will be running in root (easy for rootless deploy).
+# A runtime environment for https://github.com/Comfy-Org/ComfyUI
+# Using PyTorch 2.9.1
+# Using CUDA 12.6, GCC 13, Python 3.12
+# Using glibc 2.38 (from openSUSE Leap 15.6)
+# Using 'root' user inside the container (easy for rootless deploy).
 ################################################################################
 
-FROM docker.io/opensuse/tumbleweed:latest
+FROM docker.io/opensuse/leap:15.6
 
 LABEL maintainer="YAN Wenkun <code@yanwk.fun>"
-
-RUN set -eu
 
 ARG USING_GITHUB_ACTIONS=false
 
@@ -17,6 +17,9 @@ ARG USING_GITHUB_ACTIONS=false
 # NVIDIA CUDA devel
 # Ref: https://gitlab.com/nvidia/container-images/cuda/
 # Break down the steps, so we have more but smaller image layers.
+
+RUN --mount=type=cache,target=/var/cache/zypp \
+    zypper update --no-confirm
 
 RUN --mount=type=cache,target=/var/cache/zypp \
     printf "\
@@ -90,11 +93,19 @@ ENV PATH="${PATH}:/usr/local/cuda-12.6/bin" \
 
 RUN --mount=type=cache,target=/var/cache/zypp \
     zypper addrepo --check --refresh --priority 90 \
-        'https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Tumbleweed/Essentials/' packman-essentials \
+        'https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Leap_15.6/Essentials/' packman-essentials \
     && zypper --gpg-auto-import-keys \
         install --no-confirm --auto-agree-with-licenses \
 python312-devel \
-python312-dbm \
+python312-pip \
+python312-wheel \
+python312-setuptools \
+python312-packaging \
+python312-dbm
+
+RUN --mount=type=cache,target=/var/cache/zypp \
+    zypper --gpg-auto-import-keys \
+        install --no-confirm --auto-agree-with-licenses \
 Mesa-libGL1 \
 Mesa-libEGL-devel \
 libgthread-2_0-0 \
@@ -109,20 +120,30 @@ bison \
 gawk \
 ninja \
 git \
+git-lfs \
 aria2 \
 findutils \
-fish \
 fd \
 vim \
 which \
+tar \
+gzip \
+xz \
+wget \
+update-alternatives \
 ffmpeg \
 x264 \
 x265 \
-update-alternatives \
-google-noto-sans-fonts \
 google-noto-sans-cjk-fonts \
-google-noto-coloremoji-fonts \
-    && rm -v /usr/lib64/python3.12/EXTERNALLY-MANAGED \
+noto-coloremoji-fonts
+
+RUN --mount=type=cache,target=/var/cache/zypp \
+    zypper --non-interactive \
+        install --force-resolution \
+fish
+
+# Remove the need for 'pip install --break-system-packages'
+RUN rm -vf /usr/lib64/python3.12/EXTERNALLY-MANAGED \
     # Ensure default Python version
     && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 100
 
@@ -159,13 +180,11 @@ cpp13 \
 # PyTorch, xFormers
 # Break down the steps, so we have more but smaller image layers.
 RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 -m ensurepip --upgrade \
-    && update-alternatives --install /usr/bin/pip pip /usr/local/bin/pip3.12 100 \
-    && pip install --upgrade \
-        pip wheel setuptools packaging \
-    && pip list \
+    pip list \
     && pip install \
-        --dry-run xformers==0.0.33.post2 torchvision torchaudio \
+        --upgrade pip wheel setuptools packaging \
+    && pip install \
+        --dry-run xformers==0.0.33.post2 torch==2.9.1 torchvision==0.24.1 torchaudio==2.9.1 \
         --index-url https://download.pytorch.org/whl/cu126
 
 # Here's some hack. To reduce image size & single layer size, we:
@@ -176,14 +195,14 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Note: xFormers is not always released with latest PyTorch, so using `pip install --no-deps` is not a good idea.
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
-        xformers==0.0.33.post2 torchvision torchaudio \
+        xformers==0.0.33.post2 torch==2.9.1 torchvision==0.24.1 torchaudio==2.9.1 \
         --index-url https://download.pytorch.org/whl/cu126 \
 && pip uninstall --yes torch \
 && find /usr/local/lib/python3.12/site-packages/nvidia/ -mindepth 1 -maxdepth 1 ! -name 'nccl' ! -name 'nvshmem' -exec rm -rfv {} +
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
-        xformers==0.0.33.post2 torchvision torchaudio \
+        xformers==0.0.33.post2 torch==2.9.1 torchvision==0.24.1 torchaudio==2.9.1 \
         --index-url https://download.pytorch.org/whl/cu126
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}\
@@ -191,28 +210,32 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}\
 :/usr/local/lib/python3.12/site-packages/nvidia/nccl/lib\
 :/usr/local/lib/python3.12/site-packages/nvidia/nvshmem/lib"
 
-# Install Triton (redundant)
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install \
-        triton pytorch-triton \
-        --index-url https://download.pytorch.org/whl/cu126
-
 ################################################################################
 # More Python Packages
 
 # Deps for ComfyUI & custom nodes
 COPY builder-scripts/.  /builder-scripts/
 
+# Generate a version constraints file to pin PyTorch (prevent later installs from changing its version)
+RUN pip list --format=freeze \
+        | awk -F== 'BEGIN{want["torch"]=1;want["torchvision"]=1;want["torchaudio"]=1} $1 in want{print $1 "==" $2}' \
+        > /builder-scripts/constraints.txt \
+    && echo "Pinned PyTorch version:" \
+    && cat /builder-scripts/constraints.txt
+
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
+        -c /builder-scripts/constraints.txt \
         -r /builder-scripts/pak3.txt
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
+        -c /builder-scripts/constraints.txt \
         -r /builder-scripts/pak5.txt
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
+        -c /builder-scripts/constraints.txt \
         -r /builder-scripts/pak7.txt
 
 # Temp fixes
@@ -255,6 +278,7 @@ RUN bash /builder-scripts/preload-cache.sh
 # Install deps (comfyui-frontend-package, etc) pair to the preloaded ComfyUI version
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
+        -c /builder-scripts/constraints.txt \
         -r '/default-comfyui-bundle/ComfyUI/requirements.txt' \
         -r '/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Manager/requirements.txt' \
     && pip list

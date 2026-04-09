@@ -12,7 +12,7 @@ echo "########################################"
 
 mkdir -p /default-comfyui-bundle
 cd /default-comfyui-bundle
-git clone 'https://github.com/comfyanonymous/ComfyUI.git'
+git clone 'https://github.com/Comfy-Org/ComfyUI.git'
 cd /default-comfyui-bundle/ComfyUI
 # Using stable version (has a release tag)
 git reset --hard "$(git tag | grep -e '^v' | sort -V | tail -1)"
@@ -27,7 +27,11 @@ cat <<EOF > /default-comfyui-bundle/ComfyUI/user/__manager/config.ini
 [default]
 use_uv = False
 security_level = weak
+downgrade_blacklist = torch, torchvision, torchaudio
 EOF
+
+# Performance
+gcs https://github.com/city96/ComfyUI-GGUF.git
 
 # General
 gcs https://github.com/ltdrdata/was-node-suite-comfyui.git

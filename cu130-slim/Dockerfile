@@ -1,6 +1,6 @@
 ################################################################################
 # Dockerfile that builds 'yanwk/comfyui-boot:cu130-slim'
-# A runtime environment for https://github.com/comfyanonymous/ComfyUI
+# A runtime environment for https://github.com/Comfy-Org/ComfyUI
 # Using CUDA 13.0, Python 3.13 (with GIL).
 # Does not install xFormers by default.
 # The container will be running in root (easy for rootless deploy).
@@ -9,8 +9,6 @@
 FROM docker.io/opensuse/tumbleweed:latest
 
 LABEL maintainer="YAN Wenkun <code@yanwk.fun>"
-
-RUN set -eu
 
 ################################################################################
 # Python and tools
@@ -177,12 +175,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
         torch torchvision torchaudio \
-        --index-url https://download.pytorch.org/whl/cu130
-
-# Install Triton (redundant)
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install \
-        triton pytorch-triton \
         --index-url https://download.pytorch.org/whl/cu130
 
 # Bind libs (.so files)

@@ -1,0 +1,52 @@
+#!/bin/bash
+
+set -euo pipefail
+
+function git_force_sync () {
+    git_remote_url=$(git -C "$1" remote get-url origin) ;
+
+    if [[ $git_remote_url =~ ^(https:\/\/github\.com\/)(.*)(\.git)$ ]]; then
+        echo "Updating: $1" ;
+        git -C "$1" fetch --depth=1 --no-tags ;
+        git -C "$1" reset --hard '@{upstream}' ;
+        git -C "$1" submodule update --init --recursive --depth=1
+        echo "Done Updating: $1" ;
+    fi ;
+}
+
+echo "########################################"
+echo "[INFO] Updating ComfyUI..."
+echo "########################################"
+
+cd /default-comfyui-bundle/ComfyUI
+
+git fetch --all --tags --prune --prune-tags
+git reset --hard '@{upstream}'
+
+# Using stable version (has a release tag)
+git reset --hard "$(git tag -l 'v*' | sort -V | tail -1)"
+
+echo "########################################"
+echo "[INFO] Configuring ComfyUI & Manager..."
+echo "########################################"
+
+mkdir -p /default-comfyui-bundle/ComfyUI/user/default
+
+# Enable TAESD preview by default
+cat <<EOF > /default-comfyui-bundle/ComfyUI/user/default/comfy.settings.json
+{
+    "Comfy.Execution.PreviewMethod": "taesd"
+}
+EOF
+
+# Configure Manager
+mkdir -p /default-comfyui-bundle/ComfyUI/user/__manager
+
+cat <<EOF > /default-comfyui-bundle/ComfyUI/user/__manager/config.ini
+[default]
+use_uv = False
+security_level = weak
+downgrade_blacklist = torch, torchvision, torchaudio
+db_mode = local
+network_mode = personal_cloud
+EOF

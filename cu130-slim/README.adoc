@@ -145,7 +145,7 @@ docker rm comfyui-cu130
 |--fast
 |Enable experimental optimizations.
 (e.g. 
-https://github.com/comfyanonymous/ComfyUI/commit/9953f22fce0ba899da0676a0b374e5d1f72bf259[float8_e4m3fn] 
+https://github.com/Comfy-Org/ComfyUI/commit/9953f22fce0ba899da0676a0b374e5d1f72bf259[float8_e4m3fn] 
 matrix multiplication on Ada Lovelace and later GPUs).
 Might lower image quality. +
 Turn it off if you want stability over speed.
@@ -171,7 +171,7 @@ Turn it off if you want stability over speed.
 |===
 
 More `CLI_ARGS` available at ComyfyUI's
-https://github.com/comfyanonymous/ComfyUI/blob/master/comfy/cli_args.py[cli_args.py].
+https://github.com/Comfy-Org/ComfyUI/blob/master/comfy/cli_args.py[cli_args.py].
 
 
 [[env-vars]]
@@ -188,12 +188,19 @@ http://localhost:1081
 |Set HTTP proxy. Works the same as `set-proxy.sh`.
 
 |PIP_INDEX_URL
-|'https://pypi.org/simple'
-|Set mirror site for Python Package Index.
+|'https://pypi.org/simple' +
+'https://mirrors.cernet.edu.cn/pypi/web/simple'
+|Set mirror site of Python Package Index (used by `pip`).
+
+|GITHUB_ENDPOINT
+|'https://github.com' +
+'https://gh-proxy.org/https://github.com'
+|Set mirror site of GitHub (used by ComfyUI-Manager).
 
 |HF_ENDPOINT
-|'https://huggingface.co'
-|Set mirror site for HuggingFace Hub.
+|'https://huggingface.co' +
+'https://hf-mirror.com'
+|Set mirror site of HuggingFace Hub (used by `hf`).
 
 |HF_TOKEN
 |'hf_your_token'

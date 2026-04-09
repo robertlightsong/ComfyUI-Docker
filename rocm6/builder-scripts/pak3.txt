@@ -3,6 +3,7 @@
 # 'fairscale' for APISR
 accelerate
 compel
+Cython
 diffusers
 fairscale
 ftfy
@@ -13,7 +14,10 @@ kornia
 lark
 matplotlib
 onnx
+opencv-contrib-python
 opencv-contrib-python-headless
+opencv-python
+opencv-python-headless
 pandas
 pilgram
 pillow
