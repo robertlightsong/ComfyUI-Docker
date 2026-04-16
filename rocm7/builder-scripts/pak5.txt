@@ -3,6 +3,7 @@ aiohttp
 albumentations
 alembic
 av
+blake3
 cachetools
 chardet
 color-matcher
@@ -13,7 +14,7 @@ filelock
 fvcore
 gguf
 GitPython
-hydra-core
+glfw
 imageio-ffmpeg
 importlib-metadata
 matrix-nio
@@ -25,13 +26,16 @@ psutil
 pydantic
 pydantic-settings
 PyGithub
+PyOpenGL
 python-dateutil
 pyyaml
 rembg
+requests
 rich
 safetensors
 segment-anything
 sentencepiece
+simpleeval
 spandrel
 SQLAlchemy
 tokenizers
