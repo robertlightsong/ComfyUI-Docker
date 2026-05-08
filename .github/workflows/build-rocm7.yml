@@ -10,7 +10,6 @@ on:
       - '!rocm7/builder-scripts/**'
       - '!rocm7/runner-scripts/**'
       - '!.github/workflows/build-rocm7.yml'
-      # Trigger when new ComfyUI version released
       - '!.github/current_comfyui_release.txt'
 
 jobs:
@@ -65,19 +64,19 @@ jobs:
         run: echo "date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
       -
         name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
       -
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       -
         name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_ACCESSTOKEN }}
       -
         name: Build and push 'rocm7'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./rocm7
           file: ./rocm7/Dockerfile
@@ -93,6 +92,9 @@ jobs:
     needs: build-publish-rocm7
     runs-on: ubuntu-latest
     steps:
+      - 
+        name: Show available disk space
+        run: df -h
       - 
         name: Wait for image to be ready
         run: sleep 30s
