@@ -1,5 +1,4 @@
 addict
-aenum
 aiohttp
 aiosqlite
 albumentations
@@ -18,7 +17,6 @@ colour-science
 comfy-aimdo
 comfy-kitchen
 compressed-tensors
-datasets
 decord
 deepdiff
 dill
@@ -37,6 +35,7 @@ imageio-ffmpeg
 importlib-metadata
 iopath
 jinja2
+lark
 librosa
 loguru
 markdownify
@@ -73,7 +72,6 @@ requirements-parser
 rich
 rich-argparse
 rotary-embedding-torch
-safetensors
 segment-anything
 sentencepiece
 shapely
@@ -84,7 +82,6 @@ SQLAlchemy
 tensorboard
 tiktoken
 tipo-kgen
-tokenizers
 tomesd
 toml
 tomli

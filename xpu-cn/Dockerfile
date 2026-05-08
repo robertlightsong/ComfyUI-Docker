@@ -21,7 +21,8 @@ ARG USING_GITHUB_ACTIONS=false
 RUN if [ "${USING_GITHUB_ACTIONS}" = "false" ]; then \
         mkdir -p /root/.config/pip \
         && echo '[global]' > /root/.config/pip/pip.conf \
-        && echo 'index-url=https://mirrors.cernet.edu.cn/pypi/web/simple' >> /root/.config/pip/pip.conf ; \
+        && echo 'index-url=https://mirrors.cernet.edu.cn/pypi/web/simple' >> /root/.config/pip/pip.conf \
+        && echo 'extra-index-url=https://mirrors.cernet.edu.cn/pypi/web/simple' >> /root/.config/pip/pip.conf ; \
     fi
 
 RUN --mount=type=cache,target=/var/cache/dnf \
