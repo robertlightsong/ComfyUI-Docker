@@ -9,7 +9,6 @@ accelerate
 clip_interrogator>=0.6.0
 lark
 onnxruntime
-opencv-python-headless
 sentencepiece
 spandrel
 peft
@@ -17,11 +16,8 @@ peft
 # https://github.com/Fannovel16/ComfyUI-Frame-Interpolation
 torch
 numpy
-einops
 opencv-contrib-python
-kornia
 torchvision
-tqdm
 
 # https://github.com/kaaskoek232/IPAdapterWAN (requirements satisfied above)
 
@@ -31,3 +27,26 @@ scikit_learn
 pymatting
 blend_modes
 loguru
+
+# https://github.com/sipherxyz/comfyui-art-venture.git
+pycocoevalcap
+# opencv-python
+qrcode[pil]
+pytorch_lightning
+segment_anything
+boto3
+
+# https://github.com/numz/ComfyUI-SeedVR2_VideoUpscaler
+rotary_embedding_torch>=0.5.3
+# opencv-python
+
+# https://github.com/vrgamegirl19/comfyui-vrgamedevgirl
+librosa
+torchcodec
+google-generativeai
+av
+stable-ts
+demucs
+huggingface_hub
+voxcpm
+llama-cpp-python
