@@ -74,7 +74,7 @@ python313-PyYAML \
 python313-regex \
 python313-qrcode \
 python313-rich \
-python313-safetensors \
+# python313-safetensors \
 python313-simpleeval \
 python313-SoundFile \
 python313-SQLAlchemy \
@@ -99,7 +99,7 @@ make \
 ninja \
 git \
 aria2 \
-fish \
+# fish \
 fd \
 vim \
 which \

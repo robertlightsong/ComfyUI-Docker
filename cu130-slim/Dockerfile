@@ -66,11 +66,11 @@ RUN --mount=type=cache,target=/var/cache/zypp \
         install --no-confirm --auto-agree-with-licenses \
 make \
 bison \
-gawk \
+# gawk \
 ninja \
 aria2 \
 findutils \
-fish \
+# fish \
 fd \
 fuse \
 vim \
