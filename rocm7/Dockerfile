@@ -15,7 +15,7 @@
 # Using 'root' user inside the container.
 ################################################################################
 
-FROM rocm/pytorch:rocm7.2.3_ubuntu24.04_py3.12_pytorch_release_2.9.1
+FROM rocm/pytorch:rocm7.2.4_ubuntu24.04_py3.12_pytorch_release_2.9.1
 
 ################################################################################
 # Note the base image have already done:
@@ -80,21 +80,31 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
-https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2.3/jax_rocm7_plugin-0.8.2%2Brocm7.2.3-cp312-cp312-manylinux2014_x86_64.whl \
-https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2.3/jax_rocm7_pjrt-0.8.2%2Brocm7.2.3-py3-none-manylinux2014_x86_64.whl \
-https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2.3/jaxlib-0.8.2%2Brocm7.2.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2.4/jax_rocm7_plugin-0.8.2%2Brocm7.2.4-cp312-cp312-manylinux_2_28_x86_64.whl \
+https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2.4/jax_rocm7_pjrt-0.8.2%2Brocm7.2.4-py3-none-manylinux_2_28_x86_64.whl \
+https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2.4/jaxlib-0.8.2%2Brocm7.2.4-cp312-cp312-manylinux_2_28_x86_64.whl
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
-https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2.3/onnxruntime_migraphx-1.23.2-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl \
+https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2.4/onnxruntime_migraphx-1.23.2-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl \
 onnxruntime==1.23.2
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
-https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2.3/transformer_engine_rocm-2.6.0-py3-none-manylinux_2_28_x86_64.whl
+https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2.4/transformer_engine_rocm-2.6.0-py3-none-manylinux_2_28_x86_64.whl
 
 # The /builder-scripts is also used as a compile-install workspace for some Python packages
 COPY builder-scripts/.  /builder-scripts/
+
+# Generate a version constraints file to pin PyTorch (prevent later installs from changing its version)
+RUN pip list --format=freeze \
+        | awk -F== 'BEGIN{want["torch"]=1;want["torchvision"]=1;want["torchaudio"]=1} $1 in want{print $1 "==" $2}' \
+        > /builder-scripts/constraints.txt \
+    && echo "Pinned PyTorch version:" \
+    && cat /builder-scripts/constraints.txt
+
+# Flash Attention is not really needed for PyTorch 2.5+.
+# The code below will be removed in the future.
 
 # Compile-Install Flash Attention for ROCm
 # https://github.com/Dao-AILab/flash-attention#amd-rocm-support
@@ -103,26 +113,34 @@ COPY builder-scripts/.  /builder-scripts/
 # Composable Kernel (CK) backend (needs a GPU for compiling)
 #ENV FLASH_ATTENTION_SKIP_CK_BUILD=FALSE
 # Triton backend
-ENV FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE
+# ENV FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    cd /builder-scripts \
-    && git clone https://github.com/Dao-AILab/flash-attention \
-    && cd flash-attention \
-    && python3 setup.py install \
-    && cd /
+# RUN --mount=type=cache,target=/root/.cache/pip \
+#     cd /builder-scripts \
+#     && git clone https://github.com/Dao-AILab/flash-attention \
+#     && cd flash-attention \
+#     && pip install -e . --no-build-isolation \
+#     && cd /
 
 # Deps for ComfyUI & custom nodes
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
+        -c /builder-scripts/constraints.txt \
+        -r /builder-scripts/pak2.txt
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install \
+        -c /builder-scripts/constraints.txt \
         -r /builder-scripts/pak3.txt
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
+        -c /builder-scripts/constraints.txt \
         -r /builder-scripts/pak5.txt
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
+        -c /builder-scripts/constraints.txt \
         -r /builder-scripts/pak7.txt
 
 # Prevent SAM-2 from installing CUDA packages
@@ -146,6 +164,7 @@ RUN bash /builder-scripts/preload-cache.sh
 # Install deps (comfyui-frontend-package, etc) pair to the preloaded ComfyUI version
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
+        -c /builder-scripts/constraints.txt \
         -r '/default-comfyui-bundle/ComfyUI/requirements.txt' \
         -r '/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Manager/requirements.txt' \
     && pip list
