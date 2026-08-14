@@ -27,8 +27,9 @@ python313-Cython \
 python313-py-build-cmake \
 python313-matplotlib \
 python313-mpmath \
-python313-numba-devel \
-# python313-numpy \ # Numba conflicts with latest NumPy
+## Numba has dependency conflicts
+# python313-numba-devel \
+# python313-numpy \
 # python313-onnx \
 python313-pandas \
 python313-scikit-build \
@@ -54,7 +55,7 @@ RUN --mount=type=cache,target=/var/cache/zypp \
 python313-ffmpeg-python \
 python313-imageio \
 python313-svglib \
-ffmpeg \
+ffmpeg-8 \
 x264 \
 x265 \
 python313-GitPython \

@@ -26,8 +26,9 @@ python313-Cython \
 python313-py-build-cmake \
 python313-matplotlib \
 python313-mpmath \
-python313-numba-devel \
-# python313-numpy \ # Latest NumPy conflicts with Numba
+## Numba has dependency conflicts
+# python313-numba-devel \
+# python313-numpy \
 # python313-onnx \
 python313-pandas \
 python313-scikit-build \
@@ -105,7 +106,7 @@ vim \
 which \
 opencv \
 opencv-devel \
-ffmpeg \
+ffmpeg-8 \
 x264 \
 x265 \
 google-noto-sans-fonts \
